@@ -1,4 +1,4 @@
-#socialsolidarityCOVID19
+# socialsolidarityCOVID19
 
 PyTorch implementation of the methods, proposed in D. Grunow, D. Liu, S. Eger, A. Ils, **Changes in European solidarity before and during COVID-19:Evidence from a large-scale Crowd- and Expert-Annotated Twitterdataset **, *ACL-IJCNLP 2021*.
 
@@ -10,7 +10,7 @@ PyTorch implementation of the methods, proposed in D. Grunow, D. Liu, S. Eger, A
 * [pytorch-transformers](https://pypi.org/project/pytorch-transformers)
 
 ### Dataset
-* You can find necessary datasets [here] (https://drive.google.com/drive/folders/1X88L67fGOfTrWhI0UMKFu4dX5cYhAnof?usp=sharing).
+* You can find necessary datasets [here](https://drive.google.com/drive/folders/1X88L67fGOfTrWhI0UMKFu4dX5cYhAnof?usp=sharing).
 * Also you can crawl tweets with the functions in the folder "Crawler".
 
 ## Usage
