@@ -1,7 +1,7 @@
 # socialsolidarityCOVID19
 
 PyTorch implementation of the methods, proposed in D. Grunow, D. Liu, S. Eger, A. Ils, 
-**Changes in European solidarity before and during COVID-19:Evidence from a large-scale Crowd- and Expert-Annotated Twitterdataset **, *ACL-IJCNLP 2021*.
+**Changes in European solidarity before and during COVID-19:Evidence from a large-scale Crowd- and Expert-Annotated Twitterdataset**, *ACL-IJCNLP 2021*.
 
 ## Getting Started
 
