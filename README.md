@@ -1,7 +1,18 @@
-# socialsolidarityCOVID19
+# Changes in European Solidarity Before and During COVID-19: Evidence from a Large Crowd- and Expert-Annotated Twitter Dataset
 
-PyTorch implementation of the methods, proposed in D. Grunow, D. Liu, S. Eger, A. Ils, 
-**Changes in European solidarity before and during COVID-19:Evidence from a large-scale Crowd- and Expert-Annotated Twitterdataset**, *ACL-IJCNLP 2021*.
+Data and code for our paper
+
+```
+@inproceedings{ils:changes,
+    title = "Changes in European Solidarity Before and During COVID-19: Evidence from a Large Crowd- and Expert-Annotated Twitter Dataset",
+    author = "Alexandra Ils and Dan Liu and Daniela Grunow and Steffen Eger",
+    year = "2021", 
+   booktitle = "Proceedings of the 59th Annual Meeting of the Association for Computational Linguistics",
+   publisher = "Association for Computational Linguistics",
+   note="accepted"
+}
+```
+
 
 ## Getting Started
 
