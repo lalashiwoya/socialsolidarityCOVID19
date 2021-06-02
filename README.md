@@ -4,9 +4,9 @@ Data and code for our paper
 
 ```
 @inproceedings{ils:changes,
-    title = "Changes in European Solidarity Before and During COVID-19: Evidence from a Large Crowd- and Expert-Annotated Twitter Dataset",
-    author = "Alexandra Ils and Dan Liu and Daniela Grunow and Steffen Eger",
-    year = "2021", 
+   title = "Changes in European Solidarity Before and During COVID-19: Evidence from a Large Crowd- and Expert-Annotated Twitter Dataset",
+   author = "Alexandra Ils and Dan Liu and Daniela Grunow and Steffen Eger",
+   year = "2021", 
    booktitle = "Proceedings of the 59th Annual Meeting of the Association for Computational Linguistics",
    publisher = "Association for Computational Linguistics",
    note="accepted"
