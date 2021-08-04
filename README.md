@@ -25,6 +25,8 @@ Data and code for our paper
 * You can find necessary datasets [here](https://drive.google.com/drive/folders/1X88L67fGOfTrWhI0UMKFu4dX5cYhAnof?usp=sharing).
 * Also you can crawl tweets with the functions in the folder "Crawler".
 
+The labels in the dataset mean: 0 is solidarity, 1 is anti-solidarity, 2 is ambivalent and 3 is not applicable.
+
 ## Usage
 - An example of further pre_training using masked language modeling task and next sentence prediction task
 ```python
