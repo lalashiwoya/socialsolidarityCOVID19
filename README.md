@@ -3,13 +3,20 @@
 Data and code for our paper
 
 ```
-@inproceedings{ils:changes,
-   title = "Changes in European Solidarity Before and During COVID-19: Evidence from a Large Crowd- and Expert-Annotated Twitter Dataset",
-   author = "Ils, Alexandra and Liu, Dan and Grunow, Daniela and Eger, Steffen",
-   year = "2021", 
-   booktitle = "Proceedings of the 59th Annual Meeting of the Association for Computational Linguistics",
-   publisher = "Association for Computational Linguistics",
-   note="accepted"
+@inproceedings{ils-etal-2021-changes,
+    title = "Changes in {E}uropean Solidarity Before and During {COVID}-19: Evidence from a Large Crowd- and Expert-Annotated {T}witter Dataset",
+    author = "Ils, Alexandra  and
+      Liu, Dan  and
+      Grunow, Daniela  and
+      Eger, Steffen",
+    booktitle = "Proceedings of the 59th Annual Meeting of the Association for Computational Linguistics and the 11th International Joint Conference on Natural Language Processing (Volume 1: Long Papers)",
+    month = aug,
+    year = "2021",
+    address = "Online",
+    publisher = "Association for Computational Linguistics",
+    url = "https://aclanthology.org/2021.acl-long.129",
+    doi = "10.18653/v1/2021.acl-long.129",
+    pages = "1623--1637",
 }
 ```
 
