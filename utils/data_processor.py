@@ -4,7 +4,8 @@ import pandas as pd
 import os
 import datetime
 import re
-
+import glob
+import preprocessor as p
 
 def get_datetime_from_string(datetime_string, new_format=""):
     """
@@ -55,10 +56,14 @@ def build_dataset(path):
     # print(df_train.loc[:, 'label'].value_counts())
     # print(df_dev.loc[:, 'label'].value_counts())
     # print(df_test.loc[:, 'label'].value_counts())
-    df_train.to_csv('data/train.csv', index=False)
+    df_train.to_csv('data/hashtag_only.csv', index=False)
     df_dev.to_csv('data/dev.csv', index=False)
     df_test.to_csv('data/test.csv', index=False)
 
+def process_tweet(tweet):
+    p.set_options(p.OPT.URL, p.OPT.EMOJI, p.OPT.SMILEY, p.OPT.MENTION)
+    return p.clean(tweet)
+    
 
 def merge(label):
     """merge ambivalent and non-applicable labels (2, 3 -> 2)"""
@@ -75,12 +80,21 @@ def data_loader(path, do_merge=False):
     :param do_merge: whether merge ambivalent and non-applicable classes
     :return: a dataframe contains desired data
     """
+
     data = pd.read_csv(path)
+    print(data.iloc[0])
+    #data['text'] = data['text'].apply(lambda x: tweet_cleaner(x))
 
     if do_merge:
         data['label'] = data['label'].apply(lambda x: merge(x))
 
-    return data[['text', 'label']]
+    return data
+
+def data_process_eva(data, do_merge = True):
+    data['text'] = data['text'].apply(lambda x: process_tweet(x))
+    if do_merge:
+        data['label'] = data['label'].apply(lambda x: merge(x))
+    return data
 
 
 def load_translation(path, do_merge=False):
@@ -88,9 +102,9 @@ def load_translation(path, do_merge=False):
     data = pd.read_csv(path)
     if do_merge:
         data['label'] = data['label'].apply(lambda x: merge(x))
-    data = data[['translation', 'label']]
+    data = data[['text', 'label']]
     # print(data.head())
-    data = data.rename(columns={'translation': 'text'})  # rename column
+    #data = data.rename(columns={'translation': 'text'})  # rename column
     # print(data.head())
     return data
 
@@ -118,30 +132,45 @@ def oversampling(df, df_trans=None):
     return df_new
 
 
-def convert_data_into_features(data,tokenizer,max_len,batch_size,shuffle=True):
-    dataset=CustomDataset(data, tokenizer, max_len)
+def convert_data_into_features(data,tokenizer,max_len,batch_size,shuffle=True, label = True, merge = True):
+    data = data_process_eva(data, merge)
+    dataset=CustomDataset(data, tokenizer, max_len, label)
     data_loader= DataLoader(dataset, batch_size=batch_size, shuffle=shuffle)
     return data_loader
 
+word_maps = {"europeisdoomed":"europe is doomed","exiteu":"exit eu","wirhabenkeinenplatz":"we have no place",
+             "refugeecrisis":"refugee crisis","strongertogether":"stronger together","fluechtlingswelle":"fluechtling welle",
+             "eurorettung":"euro rettung","eurocrisis":"euro crisis","frexit":"fr exit","refugeeswelcome":"refugee welcome",
+             "solidarunion":"solidary union","welcomerefugees":"welcome refugee","leavenoonebehind":"leave no one behind",
+             "wellcomeunited":"welcome united","wehabenplatz":"we have place","wirhabenkeinenplatz":"we have no place",
+             "wirhabenplatz":"wir have place","wirschaffendas":"wir schaffen das","standwithrefugees":"stand with refugee",
+             "refugeesnotwelcome":"refugee not welcome","schuldenunion":"schulden union"}
 
 def tweet_cleaner(tweet):
     """
     function that replaces mentions, hashtags and urls with special tokens
     """
-    hashtags = re.compile(r"^#\S+|\s#\S+")
-    mentions = re.compile(r"^@\S+|\s@\S+")
-    urls = re.compile(r"https?://\S+")
-    res = hashtags.sub(' #hashtag', tweet)
-    res = mentions.sub(' @user', res)
-    res = urls.sub(' url', res)
-    res = ' '.join(res.split())
-    return res.strip()
+    #hashtags = re.compile(r"^#\S+|\s#\S+")
+    tweet = re.sub(r"^@\S+|\s@\S+"," ",tweet)
+    tweet = re.sub(r"https?://\S+"," ",tweet)
+    tweet = re.sub(r"[#1-9]"," ",tweet)
+    tweet = re.sub(r"[😍❤️🤗👍💪🙏]"," support",tweet)
+    tweet = re.sub(r"[😔💔]"," sad",tweet)
+    tweet = tweet.lower()
+    #output = []
+    #for word in tweet.split():
+        #if word in word_maps:
+            #output.append(word_maps[word])
+        #else:
+            #output.append(word)
+    return tweet
+    #return " ".join(output)
 
 
 def build_cls_dataloader(path, tokenizer,max_len,batch_size):
     # Import the csv into pandas dataframe and add the headers
     df = pd.read_csv(path)
-    df['text'] = df['text'].apply(lambda x: tweet_cleaner(x))
+    #df['text'] = df['text'].apply(lambda x: tweet_cleaner(x))
     print(df)
     # dataset = df.sample(n=2000, replace=False, random_state=200)
     dataset = df
@@ -163,33 +192,46 @@ def build_cls_dataloader(path, tokenizer,max_len,batch_size):
     return train_loader, dev_loader
 
 
-def build_dataloader(src_path, do_merge, tokenizer, max_len, batch_size,
-                     oversample_from_train=False, oversample_from_trans=False, translation=False, auto_data=False):
+def build_dataloader(src_path, split, do_merge, tokenizer, max_len, batch_size,
+                     oversample_from_train=False, oversample_from_trans=False, 
+                     translation=False, auto_data=False, expert = False,
+                     expert_only_hashtags = False, all_only_hashtags = False,
+                     all_no_hashtags = False):
     # Load dataset
-    df_train = data_loader(os.path.join(src_path, 'train.csv'), do_merge)
-
+    df_train = data_loader(os.path.join(src_path, 'split'+str(split), 'train.csv'), do_merge)
+    if expert:
+        df_train = data_loader(os.path.join(src_path, 'split'+str(split),f'train_expert_split{split}.csv'),
+        do_merge)
+    if expert_only_hashtags:
+        df_train = data_loader(os.path.join(src_path, 'split'+str(split),
+        f'train_expert_only_hashtag_split{split}.csv'), do_merge)
+    if all_only_hashtags:
+        df_train = data_loader(os.path.join(src_path, 'split'+str(split),f'only_hashtag_split_{split}.csv'), do_merge)
+    if all_no_hashtags:
+        df_train = data_loader(os.path.join(src_path, 'split'+str(split),f'no_hashtag_split_{split}.csv'), do_merge)
     # add auto-labeled data
     if auto_data:
         print("add auto data ...")
-        df_extra = data_loader(os.path.join(src_path, 'auto_labeled_data.csv'))
+        df_extra = data_loader(os.path.join(src_path, 'auto_labeled_35000.csv'))
         df_train = pd.concat([df_train, df_extra])
         df_train = df_train.sample(frac=1, random_state=42).reset_index(drop=True)
 
     # add translation
-    df_trans = load_translation(os.path.join(src_path, 'train_translated.csv'), do_merge=do_merge)  # translated data
+    df_trans = load_translation(os.path.join(src_path, 'split'+str(split), f'train_translated_split{split}.csv'), do_merge=do_merge)  # translated data
     if translation:
         print("add translated data ...")
         df_train = pd.concat([df_train, df_trans])
         df_train = df_train.sample(frac=1, random_state=42).reset_index(drop=True)
-
+    
     # oversampling
     if oversample_from_train:
         df_train = oversampling(df_train)  # sample from original data
     elif oversample_from_trans:
         df_train = oversampling(df_train, df_trans)  # sample from translated data
 
-    df_dev = data_loader(os.path.join(src_path, 'dev.csv'), do_merge)
-    df_test = data_loader(os.path.join(src_path, 'test.csv'), do_merge)
+    df_dev = data_loader(os.path.join(src_path, 'split'+str(split),'dev.csv'), do_merge)
+    df_test = data_loader(os.path.join(src_path,'split'+str(split), 'test.csv'), do_merge)
+    
 
     print(len(df_train), len(df_dev), len(df_test))
     print(df_train.loc[:, 'label'].value_counts())

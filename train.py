@@ -11,15 +11,25 @@ import random
 import numpy as np
 import torch
 from torch import cuda
+import csv
+import time 
 device = 'cuda' if cuda.is_available() else 'cpu'
 
 
 def train(dataloader_train, model, optimizer, is_norm=False):
+    
     model.train()
 
     loss_train_total = 0
 
-    for _, data in enumerate(dataloader_train, 0):
+    for i, data in enumerate(dataloader_train, 0):
+        if(i==0):
+            start = time.time()
+        if(i%1000==0 and i!=0):
+            end = time.time()
+            print(f'iteration {i} finished, processing time {end-start}')
+            start = end
+            
         ids = data['ids'].to(device, dtype=torch.long)
         mask = data['mask'].to(device, dtype=torch.long)
         token_type_ids = data['token_type_ids'].to(device, dtype=torch.long)
@@ -37,6 +47,7 @@ def train(dataloader_train, model, optimizer, is_norm=False):
         optimizer.step()
 
     loss_train_avg = loss_train_total / len(dataloader_train)
+    
     print(f'Training loss: {loss_train_avg}')
 
 
@@ -80,9 +91,9 @@ if __name__ == "__main__":
                         help="Choose model type from bert, xlm, bert_cnn, bert_dpcnn")
     parser.add_argument("--pretrained_weights", type=str, required=True,
                         help="""Name of the pretrained weights from huggingface transformers 
-                        (e.g. 'bert-base-multilingual-uncased', 'xlm-roberta-base'), or path of self-trained weights""")
-    parser.add_argument("--model_path", default=None, type=str,
-                        help="path to save the model")
+                        (e.g. 'bert-base-multilingual-cased', 'xlm-roberta-base'), or path of self-trained weights""")
+    #parser.add_argument("--model_path", default=None, type=str,
+                        #help="path to save the model")
 
     parser.add_argument("--oversample_from_train", action="store_true",
                         help="Whether do oversampling from training data")
@@ -98,13 +109,19 @@ if __name__ == "__main__":
     parser.add_argument('--do_merge', type=bool, default=True,
                         help="Whether merge ambivalent and non-applicable classes")
     parser.add_argument("--max_len", type=int, default=150, help="Maximal sequence length of bert or xlm model")
-    parser.add_argument("--epochs", type=int, default=50, help="Maximal number of epochs to train")
-    parser.add_argument("--patience", type=int, default=6,
+    parser.add_argument("--epochs", type=int, default=10, help="Maximal number of epochs to train")
+    parser.add_argument("--patience", type=int, default=5,
                         help="How many epochs to wait after last improvement (for early stopping).")
-    parser.add_argument("--batch_size", default=4, type=int, help="The batch size for training.")
+    parser.add_argument("--batch_size", default=16, type=int, help="The batch size for training.")
     parser.add_argument("--learning_rate", default=1e-5, type=float, help="The initial learning rate for AdamW.")
-    parser.add_argument('--seed', type=int, default=42, help="random seed")
+    parser.add_argument('--seed', type=int, default=32, help="random seed")
     parser.add_argument('--do_lower_case', action="store_true", help="Whether lowercase text before tokenization")
+    parser.add_argument('--split', type = int, required = True, help="Choose split from 1/2/3")
+    parser.add_argument('--expert', action="store_true", help="Only contained expert annotations in the train set")
+    parser.add_argument('--expert_only_hashtags', action="store_true", help="Only contained expert annotations (after removing everything except hashtags) in the train set")
+    parser.add_argument('--all_only_hashtags', action="store_true", help="contained expert + crowd annotations (after removing everything except hashtags) in the train set")
+    parser.add_argument('--all_no_hashtags', action="store_true", help="contained expert + crowd annotations (after removing hashtags) in the train set")
+
 
     args = parser.parse_args()
 
@@ -121,12 +138,38 @@ if __name__ == "__main__":
     EPOCHS = args.epochs
     LEARNING_RATE = args.learning_rate
     print(
-        f'max_len={MAX_LEN}, batch_size={BATCH_SIZE}, epochs={EPOCHS}, learning_rate={LEARNING_RATE}, seed={args.seed}, patience={args.patience}, do_lower_case={args.do_lower_case}')
-
-    if args.model_path is None:
-        model_path = os.path.join('saved_weights', f'{args.model_type}_pytorch_model.bin')
-    else:
-        model_path = args.model_path
+        f'max_len={MAX_LEN}, batch_size={BATCH_SIZE}, epochs={EPOCHS}, learning_rate={LEARNING_RATE}, seed={args.seed}, patience={args.patience}, do_lower_case={args.do_lower_case} split = {args.split}')
+    
+    strategies = []
+    strategies.append(args.model_type)
+    if args. oversample_from_train:
+        strategies.append("oversample_from_train")
+    if args.oversample_from_trans:
+        strategies.append("oversample_from_trans")
+    if args.translation:
+        strategies.append("translation")
+    if args.auto_data:
+        strategies.append("auto_label")
+    if args.is_norm:
+        strategies.append("normalization")
+    if args.expert:
+        strategies.append("expert")
+    if args.expert_only_hashtags:
+        strategies.append("expert_annotations_with_only_hashtags")
+    if args.all_only_hashtags:
+        strategies.append("expert+crowd_annotations_with_only_hashtags")
+    if args.all_no_hashtags:
+        strategies.append("expert+crowd_annotations_with_no_hashtags")
+    
+    strategies.append('split'+str(args.split))
+    strategies.append(args.pretrained_weights.split('/')[-1])
+    
+    strategies = ' '.join(strategies)
+    print(strategies)
+    
+    
+    
+     
 
     num_labels = 3 if DO_MERGE else 4
 
@@ -155,28 +198,37 @@ if __name__ == "__main__":
 
     tokenizer = AutoTokenizer.from_pretrained(args.pretrained_weights, do_lower_case=args.do_lower_case)
 
-    dataloader_train, dataloader_dev, dataloader_test = build_dataloader(src_path='data', do_merge=DO_MERGE,
+    dataloader_train, dataloader_dev, dataloader_test = build_dataloader(src_path=f'data', split = args.split, do_merge=DO_MERGE,
                                                                          tokenizer=tokenizer, max_len=MAX_LEN,
                                                                          batch_size=BATCH_SIZE,
                                                                          oversample_from_train=args.oversample_from_train,
                                                                          oversample_from_trans=args.oversample_from_trans,
                                                                          translation=args.translation,
-                                                                         auto_data=args.auto_data)
+                                                                         auto_data=args.auto_data,
+                                                                         expert = args.expert,
+                                                                         expert_only_hashtags = args.expert_only_hashtags,
+                                                                         all_only_hashtags = args.all_only_hashtags,
+                                                                         all_no_hashtags = args.all_no_hashtags)
 
     model.to(device)
     optimizer = AdamW(model.parameters(),
                       lr=LEARNING_RATE,
                       eps=1e-8)
-
-    early_stopping = EarlyStopping(patience=args.patience, verbose=True, monitor='val_f1', path=model_path)
-
+    model_path = os.path.join('saved_weights', f'{strategies}.bin')
+    early_stopping = EarlyStopping(patience=args.patience, verbose=True, monitor='val_f1')
+ 
     for epoch in range(1, EPOCHS + 1):
         print(f'Epoch {epoch}')
+        start = time.time()
         train(dataloader_train, model, optimizer, is_norm=args.is_norm)
         predictions, true_vals = evaluate(dataloader_dev, model, is_norm=args.is_norm)
         val_f1 = metrics.f1_score(true_vals, predictions, average='macro')
+        end = time.time()
+        print(f'for epoch {epoch} the training time is {end-start}')
         print(f'F1 score (macro) on dev set: {val_f1}')
-        early_stopping(val_f1, model)
+        #model_path = os.path.join('saved_weights', f'{strategies}_{str(round(val_f1,4))}.bin')
+  
+        early_stopping(val_f1, model,model_path)
         if early_stopping.early_stop:
             print("Early stopping")
             break
@@ -193,6 +245,8 @@ if __name__ == "__main__":
     print('Testing....')
     predictions, true_vals = evaluate(dataloader_test, model, is_norm=args.is_norm)
     f1_test = show_performance(true_vals, predictions)
-
-
+    
+    with open('results.csv','a+',newline="") as csvfile:
+        writer = csv.writer(csvfile)
+        writer.writerow([model_path,round(f1_val,3),round(f1_test,3)])
 

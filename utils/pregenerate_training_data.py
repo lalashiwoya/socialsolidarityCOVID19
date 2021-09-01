@@ -289,13 +289,13 @@ def create_training_file(docs, vocab_list, args, epoch_num):
 
 def main():
     parser = ArgumentParser()
-    parser.add_argument('--train_corpus', type=Path, required=True,help="The input training data file (a text file)")
-    parser.add_argument("--output_dir", type=Path, required=True,help="The output directory where the model predictions and checkpoints will be written")
-    parser.add_argument("--bert_model", type=str, default="bert-base-multilingual-cased",help="The model architecture to be trained")
+    parser.add_argument('--train_corpus', type=Path, required=True)
+    parser.add_argument("--output_dir", type=Path, required=True)
+    parser.add_argument("--bert_model", type=str, default="fine_tune/finetuned_lm_180k")
     #parser.add_argument("--bert_model",type=Path)
     parser.add_argument("--do_lower_case", action="store_true")
     parser.add_argument("--do_whole_word_mask", action="store_true",
-                        help="Whether to use whole word masking rather than per-WordPiece masking")
+                        help="Whether to use whole word masking rather than per-WordPiece masking.")
     parser.add_argument("--reduce_memory", action="store_true",
                         help="Reduce memory usage for large datasets by keeping data on disc rather than in memory")
 
@@ -315,9 +315,12 @@ def main():
 
     if args.num_workers > 1 and args.reduce_memory:
         raise ValueError("Cannot use multiple workers while reducing memory")
-
+    #expand_vocab=['oneworldonehumanit','refugeeswelcome','grexit','eusolidaritÃ¤t','asyl','flÃ¼chtling','covid','asylumseeker','corona','seenotrettung','eusolidarity','wirschaffendas','refugee','griechenland','syria','moria','strongtogether','lesbos','afd','refugeesnotwelcome','idlib','standwithgreece','standwithgreece','erdogan','sdgs','austerity','flÃ¼chtlingswelle',':red_heart_selector:',':winking_face:',':thumbs_up:',':heart_suit_selector:',':hugging_face:',':smiling_face_with_smiling_eyes:',':folded_hands:',':smiling_face_with_heart-eyes:',':face_with_tears_of_joy:',':thinking_face:',':face_with_rolling_eyes:',':broken_heart:',':pensive_face:']
     tokenizer = BertTokenizer.from_pretrained(args.bert_model, do_lower_case=args.do_lower_case)
+    
     vocab_list = list(tokenizer.vocab.keys())
+    
+     
     with DocumentDatabase(reduce_memory=args.reduce_memory) as docs:
         with args.train_corpus.open() as f:
             doc = []
@@ -347,7 +350,7 @@ def main():
         else:
             for epoch in trange(args.epochs_to_generate, desc="Epoch"):
                 create_training_file(docs, vocab_list, args, epoch)
-
+    print(vocab_list)
 
 if __name__ == '__main__':
     main()

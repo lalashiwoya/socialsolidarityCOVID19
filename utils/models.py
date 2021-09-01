@@ -10,7 +10,6 @@ def z_norm(inputs):  # Batch Normalization
     var = inputs.var(0, unbiased=False, keepdim=True)
     return (inputs - mean) / torch.sqrt(var + 1e-9)
 
-
 class bertCNN(nn.Module):
     def __init__(self, embed_model, dropout=0.2, kernel_num=4, kernel_sizes=[4, 5, 6], num_labels=4):
         super().__init__()
@@ -50,6 +49,7 @@ class bertCNN(nn.Module):
                 loss = loss_fct(logits.view(-1, self.num_labels), labels.view(-1))
             outputs = (loss,) + outputs
         return outputs  # (loss), logits
+
 
 
 class bertDPCNN(nn.Module):
@@ -117,21 +117,21 @@ class bertDPCNN(nn.Module):
 
 
 class basicBert(nn.Module):
-    def __init__(self,embed_model, dropout=0.2, num_labels=4):
+    def __init__(self,embed_model, dropout=0.1, num_labels=3, freeze = True):
         super().__init__()
         self.embed = embed_model
+        if freeze:
+            for p in self.embed.parameters():
+                p.requires_grad = False
         self.dropout=nn.Dropout(dropout)
         self.classifier = nn.Linear(self.embed.config.hidden_size, num_labels)
 
     def forward(self, input_ids, attention_mask, token_type_ids=None, freeze=True):
-        if freeze:
-            with torch.no_grad():
-                output = self.embed(input_ids, attention_mask, token_type_ids)
-        else:
-            output = self.embed(input_ids, attention_mask, token_type_ids)
+        output = self.embed(input_ids, attention_mask, token_type_ids)
         output=self.dropout(output[1])
         output=self.classifier(output)
         return output
+
 
 """
 The following code is adapted from huggingface transformers:
@@ -158,13 +158,15 @@ class BertPooler(nn.Module):
 
 
 class BertForSequenceClassification(BertPreTrainedModel):
-    def __init__(self, config):
+    def __init__(self, config, freeze = False):
         super().__init__(config)
         self.num_labels = config.num_labels
         self.bert = BertModel(config)
         self.dropout = nn.Dropout(config.hidden_dropout_prob)
         self.classifier = nn.Linear(config.hidden_size, config.num_labels)
-
+        if freeze:
+            for p in self.bert.parameters():
+                p.requires_grad = False
         self.pooler = BertPooler(config)
         self.init_weights()
 
@@ -234,11 +236,16 @@ class RobertaForSequenceClassification(BertPreTrainedModel):
     config_class = RobertaConfig
     base_model_prefix = "roberta"
 
-    def __init__(self, config):
+    def __init__(self, config, freeze = False):
         super().__init__(config)
         self.num_labels = config.num_labels
 
         self.roberta = RobertaModel(config)
+        
+        if freeze:
+            for p in self.roberta.parameters():
+                p.requires_grad = False
+            
         self.classifier = RobertaClassificationHead(config)
 
         self.init_weights()
@@ -273,7 +280,7 @@ class RobertaForSequenceClassification(BertPreTrainedModel):
         )
         sequence_output = outputs[0]
         logits = self.classifier(sequence_output, is_norm=is_norm)
-
+        outputs = (logits,) + outputs[2:]
         loss = None
         if labels is not None:
             if self.num_labels == 1:
@@ -298,4 +305,4 @@ class XLMRobertaForSequenceClassification(RobertaForSequenceClassification):
     """
 
     config_class = XLMRobertaConfig
-
+    

@@ -23,14 +23,9 @@ Data and code for our paper
 
 ## Getting Started
 
-### Dependencies
-* Python3
-* [transformers](https://github.com/huggingface/transformers)
-* [pytorch-transformers](https://pypi.org/project/pytorch-transformers)
 
-### Dataset
-* You can find necessary datasets [here](https://drive.google.com/drive/folders/1X88L67fGOfTrWhI0UMKFu4dX5cYhAnof?usp=sharing).
-* Also you can crawl tweets with the functions in the folder "Crawler".
+* You can crawl tweets with codes in folder /tweets_crawl, but please not that not all dependencies for tweet crawling are 
+* listed in the requirements.txt
 
 The labels in the dataset mean: 0 is solidarity, 1 is anti-solidarity, 2 is ambivalent and 3 is not applicable.
 

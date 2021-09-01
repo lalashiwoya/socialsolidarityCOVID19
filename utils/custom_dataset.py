@@ -4,11 +4,12 @@ from torch.utils.data import Dataset
 
 class CustomDataset(Dataset):
     # tokenize the text data, prepare the model input
-    def __init__(self, dataframe, tokenizer, max_len):
+    def __init__(self, dataframe, tokenizer, max_len, label = True):
         self.len = len(dataframe)
         self.tokenizer = tokenizer
         self.data = dataframe
         self.max_len = max_len
+        self.label = label
 
     def __len__(self):
         return self.len
@@ -29,10 +30,17 @@ class CustomDataset(Dataset):
         ids = inputs['input_ids']
         mask = inputs['attention_mask']
         token_type_ids = inputs["token_type_ids"]
-
-        return {
-            'ids': torch.tensor(ids, dtype=torch.long),
-            'mask': torch.tensor(mask, dtype=torch.long),
-            'token_type_ids': torch.tensor(token_type_ids, dtype=torch.long),
-            'targets': torch.tensor(self.data.label[index], dtype=torch.long)
-        }
+        
+        if self.label:
+            return {
+                'ids': torch.tensor(ids, dtype=torch.long),
+                'mask': torch.tensor(mask, dtype=torch.long),
+                'token_type_ids': torch.tensor(token_type_ids, dtype=torch.long),
+                'targets': torch.tensor(self.data.label[index], dtype=torch.long)
+            }
+        else:
+            return {
+                'ids': torch.tensor(ids, dtype=torch.long),
+                'mask': torch.tensor(mask, dtype=torch.long),
+                'token_type_ids': torch.tensor(token_type_ids, dtype=torch.long)
+            }
