@@ -66,7 +66,7 @@ The labels in the dataset mean: 0 is solidarity, 1 is anti-solidarity, 2 is ambi
 # --oversample_from_train: whether do oversampling from training data  
 # --translation: whether add translated data for training  
 # --auto_data: whether add auto-labeled data for training  
-# --is_norm: whether add batch normalization after the last hidden layer of bert or xlm model
+
 
 >>> python train.py --model_type xlm --pretrained_weights xlm-roberta-base --translation --auto_data 
 ``` 
