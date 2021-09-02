@@ -5,7 +5,7 @@ import os
 import datetime
 import re
 import glob
-import preprocessor as p
+#import preprocessor as p
 
 def get_datetime_from_string(datetime_string, new_format=""):
     """
@@ -91,7 +91,7 @@ def data_loader(path, do_merge=False):
     return data
 
 def data_process_eva(data, do_merge = True):
-    data['text'] = data['text'].apply(lambda x: process_tweet(x))
+    #data['text'] = data['text'].apply(lambda x: process_tweet(x))
     if do_merge:
         data['label'] = data['label'].apply(lambda x: merge(x))
     return data
