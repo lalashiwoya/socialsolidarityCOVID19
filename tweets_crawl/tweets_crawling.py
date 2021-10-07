@@ -28,6 +28,9 @@ if not os.path.exists(os.path.join(year,'ids')):
 
 if not os.path.exists(os.path.join(year,'json')):
   os.mkdir(os.path.join(year,'json'))
+  
+ 
+
 
 '''
 since = '2019-09-01'
@@ -49,6 +52,22 @@ for hashtag in remining_hashtags:
   run.Search(c)
 '''
 
+since = year+'-01-01'
+until = year+'-12-21'
+
+c = config.Config()
+c.Since = since
+c.Until = until
+c.Store_csv = True
+
+for hashtag in remining_hashtags:
+  print(hashtag)
+  c.Output = os.path.join(year, dir, hashtag+'.csv')
+  c.Search = hashtag
+  run.Search(c)
+
+
+
 def chunks(lst, n):
     """Yield successive n-sized chunks from lst."""
     for i in range(0, len(lst), n):
@@ -69,7 +88,7 @@ api = tweepy.API(auth, wait_on_rate_limit=True, wait_on_rate_limit_notify=True)
 for hashtag in exist_files:
     data = pd.read_csv(hashtag)
     ids = set(data.id)
-    print('number of ids ', len(ids))
+    print('number of tweets ', len(ids))
     output = os.path.join(year, 'json', hashtag.split('/')[-1][:-4] + ".json")
     count = 0
     ids = list(ids)
@@ -82,9 +101,10 @@ for hashtag in exist_files:
                     file.write(j)
                     file.write("\n")
                     count += 1
-                    print(count)
+                    if count%100 == 0:
+                      print(count)
 
             except:
                 print('error')
-        print("crawling finished ", file)
-    print(count)
+    print(f"Crawling for {hashtag} finished, the number of tweets is {count}")
+   
