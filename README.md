@@ -29,6 +29,8 @@ listed in the requirements.txt
 
 The labels in the dataset mean: 0 is solidarity, 1 is anti-solidarity, 2 is ambivalent and 3 is not applicable.
 
+You can see the dataset we used in experiments here [https://drive.google.com/drive/folders/1zVMPJtQBidFZ9QokR58rjXkibfyVANaG?usp=sharing]
+
 ## Usage
 - An example of further pre_training using masked language modeling task and next sentence prediction task
 ```python
