@@ -31,7 +31,7 @@ listed in the requirements.txt.
     *  Put your hashtags in Hashtags.csv
     *  Change the value of 'year' (e.g. 2021)in tweets_crawling.py, so you can crawl tweets containing wanted hashtags in 2021
     *  Fill in consumerKey, consumerSecret, accessToken, accessTokenSecret in tweets_crawling.py
-    *  If you use Windows, there might be some path issues, just change the path separator according to your own system
+    *  If you use Windows, there might be some path issues, just change the path separator according to your own OS
 
 
 
