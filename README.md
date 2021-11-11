@@ -26,8 +26,12 @@ Data and code for our paper
 
 * You can crawl tweets with codes in the folder /tweets_crawl, but please not that not all dependencies for tweet crawling are 
 listed in the requirements.txt. 
+    *  Get access to Tweepy
+    *  Unzip GetOldTweets3-20211011T120612Z-001.zip
+    *  Put your hashtags in Hashtags.csv
+    *  Change the value of 'year' (e.g. 2021)in tweets_crawling.py, so you can crawl tweets containing wanting hashtags in 2021
+    *  Fill in consumerKey, consumerSecret, accessToken, accessTokenSecret in tweets_crawling.py
 
-    * rrr
 
 
 The labels in the dataset mean: 0 is solidarity, 1 is anti-solidarity, 2 is ambivalent and 3 is not applicable.
