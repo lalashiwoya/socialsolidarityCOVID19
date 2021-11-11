@@ -26,7 +26,7 @@ Data and code for our paper
 
 * You can crawl tweets with codes in the folder /tweets_crawl, but please not that not all dependencies for tweet crawling are 
 listed in the requirements.txt. 
-    *  Get access to Tweepy
+    *  Get access to Tweepy (The free one is enough)
     *  Unzip GetOldTweets3-20211011T120612Z-001.zip (This is the GetOldTweets3 I used in tweets_crawling.py, please don't install it with pip, because I made some modifications on the basis of the offical one)
     *  Put your hashtags in Hashtags.csv
     *  Change the value of 'year' (e.g. 2021)in tweets_crawling.py, so you can crawl tweets containing wanted hashtags in 2021
