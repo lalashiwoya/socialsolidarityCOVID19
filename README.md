@@ -27,6 +27,8 @@ Data and code for our paper
 * You can crawl tweets with codes in the folder /tweets_crawl, but please not that not all dependencies for tweet crawling are 
 listed in the requirements.txt
 
+### Tweets Crawling
+
 The labels in the dataset mean: 0 is solidarity, 1 is anti-solidarity, 2 is ambivalent and 3 is not applicable.
 
 * You can view the dataset we used in our experiments [here](https://drive.google.com/drive/folders/1zVMPJtQBidFZ9QokR58rjXkibfyVANaG?usp=sharing). Please note that for the sake of privacy, we have omitted the content of the tweets, but we have included the tweet ids, you can crawl tweets with these ids.
