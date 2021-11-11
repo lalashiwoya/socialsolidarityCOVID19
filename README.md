@@ -29,7 +29,7 @@ listed in the requirements.txt.
     *  Get access to Tweepy
     *  Unzip GetOldTweets3-20211011T120612Z-001.zip
     *  Put your hashtags in Hashtags.csv
-    *  Change the value of 'year' (e.g. 2021)in tweets_crawling.py, so you can crawl tweets containing wanting hashtags in 2021
+    *  Change the value of 'year' (e.g. 2021)in tweets_crawling.py, so you can crawl tweets containing wanted hashtags in 2021
     *  Fill in consumerKey, consumerSecret, accessToken, accessTokenSecret in tweets_crawling.py
 
 
